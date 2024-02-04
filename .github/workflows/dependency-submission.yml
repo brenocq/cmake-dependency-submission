@@ -1,0 +1,36 @@
+name: Dependency Submission
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  dependency-submission-glob:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: philips-forks/cmake-dependency-submission@main
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh ext install advanced-security/gh-sbom
+          gh sbom | jq
+  dependency-submission-configure:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - run: cmake -S example -B build
+      - uses: philips-forks/cmake-dependency-submission@main
+        with:
+          scanMode: 'configure'
+          buildPath: 'build'
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh ext install advanced-security/gh-sbom
+          gh sbom | jq
